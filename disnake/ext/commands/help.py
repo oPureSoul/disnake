@@ -32,7 +32,7 @@ from .errors import CommandError
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ._types import Check, FuncT
+    from ._types import Check, FuncT, MaybeCoro
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
@@ -284,8 +284,7 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
 
 
 class HelpCommand:
-    """
-    The base implementation for help command formatting.
+    """The base implementation for help command formatting.
 
     .. note::
 
@@ -369,9 +368,8 @@ class HelpCommand:
         bot.remove_command(self._command_impl.name)
         self._command_impl._eject_cog()
 
-    def add_check(self, func: Check) -> None:
-        """
-        Adds a check to the help command.
+    def add_check(self, func) -> None:
+        """Adds a check to the help command.
 
         .. versionadded:: 1.4
 
@@ -383,8 +381,7 @@ class HelpCommand:
         self._command_impl.add_check(func)
 
     def remove_check(self, func: Check) -> None:
-        """
-        Removes a check from the help command.
+        """Removes a check from the help command.
 
         This function is idempotent and will not raise an exception if
         the function is not in the command's checks.
@@ -506,7 +503,7 @@ class HelpCommand:
         if cog is not None:
             self._command_impl._inject_into_cog(cog)
 
-    def command_not_found(self, string: str) -> str:
+    def command_not_found(self, string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command is not found in the help command.
@@ -527,7 +524,7 @@ class HelpCommand:
         """
         return f'No command called "{string}" found.'
 
-    def subcommand_not_found(self, command: Command[Any, ..., Any], string: str) -> str:
+    def subcommand_not_found(self, command: Command[Any, ..., Any], string: str) -> MaybeCoro[str]:
         """|maybecoro|
 
         A method called when a command did not have a subcommand requested in the help command.
@@ -587,7 +584,6 @@ class HelpCommand:
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
-
         # set `key` iff `sort` is true
         if not sort:
             key = None

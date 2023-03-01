@@ -31,6 +31,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NoReturn,
     Optional,
     Protocol,
     Sequence,
@@ -94,7 +95,7 @@ MISSING: Any = _MissingSentinel()
 
 
 class _cached_property:
-    def __init__(self, function):
+    def __init__(self, function) -> None:
         self.function = function
         self.__doc__: Optional[str] = function.__doc__
 
@@ -167,7 +168,7 @@ class classproperty(Generic[T_co]):
     def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
         return self.fget(owner)
 
-    def __set__(self, instance, value) -> None:
+    def __set__(self, instance, value) -> NoReturn:
         raise AttributeError("cannot set attribute")
 
 
@@ -181,7 +182,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
 class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
-    def __init__(self, proxied: Sequence[T_co]):
+    def __init__(self, proxied: Sequence[T_co]) -> None:
         self.__proxied = proxied
 
     def __getitem__(self, idx: int) -> T_co:
@@ -332,8 +333,6 @@ def oauth_url(
 def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     """Parse a token into its parts
 
-    Returns
-
     Parameters
     ----------
     token: :class:`str`
@@ -357,8 +356,7 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
 
 
 def snowflake_time(id: int) -> datetime.datetime:
-    """
-    Parameters
+    """Parameters
     ----------
     id: :class:`int`
         The snowflake ID.
@@ -417,7 +415,6 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     seq: :class:`collections.abc.Iterable`
         The iterable to search through.
     """
-
     for element in seq:
         if predicate(element):
             return element
@@ -425,8 +422,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    """
-    A helper that returns the first element in the iterable that meets
+    """A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -442,7 +438,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
     Examples
     --------
-
     Basic usage:
 
     .. code-block:: python3
@@ -468,7 +463,6 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     **attrs
         Keyword arguments that denote attributes to search with.
     """
-
     # global -> local
     _all = all
     attrget = attrgetter
@@ -694,7 +688,7 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False):
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
             ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
@@ -742,8 +736,7 @@ def resolve_invite(
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
 ) -> Union[str, Tuple[str, Dict[str, str]]]:
-    """
-    Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
@@ -779,8 +772,7 @@ def resolve_invite(
 
 
 def resolve_template(code: Union[Template, str]) -> str:
-    """
-    Resolves a template code from a :class:`~disnake.Template`, URL or code.
+    """Resolves a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
 
@@ -856,8 +848,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """
-    A helper function that escapes Discord's markdown.
+    """A helper function that escapes Discord's markdown.
 
     Parameters
     ----------
@@ -880,7 +871,6 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     :class:`str`
         The text with the markdown special characters escaped with a slash.
     """
-
     if not as_needed:
 
         def replacement(match):
@@ -1170,7 +1160,7 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: S307  # this is how annotations are supposed to be evaled
+        evaluated = eval(  # noqa: PGH001 # this is how annotations are supposed to be unstringifed
             tp, globals, locals
         )
         cache[tp] = evaluated
@@ -1294,7 +1284,7 @@ def search_directory(path: str) -> Iterator[str]:
         The path to search for modules
 
     Yields
-    -------
+    ------
     :class:`str`
         The name of the found module. (usable in load_extension)
     """
@@ -1322,8 +1312,7 @@ def search_directory(path: str) -> Iterator[str]:
 
 
 def as_valid_locale(locale: str) -> Optional[str]:
-    """
-    Converts the provided locale name to a name that is valid for use with the API,
+    """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
     Returns ``None`` for invalid names.
 
