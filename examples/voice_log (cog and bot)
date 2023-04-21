@@ -1,0 +1,128 @@
+Как работает Ког/Бот?
+И так, для начала, ьот прослушивает все действия в голосовых каналах. А далее их фильтрует, вот примеры
+before.channel == None:
+    Когда бот определяет, что произошло действие, но отсутсвует предыдущий канал, то от отправляет Embed сообщение о том, что пользователь подключился к каналу.
+after.channel == None:
+    По той же схеме понимает, что пользователь отключился от канала, и отправляет Embed сообщение.
+before.channel == after.channel:
+    Это означает что пользователь перешел в другой канал, бот на это реагирует Embed сообщением. 
+
+==============================================================================================
+
+#Ког:
+
+#Ahtung: везде где прописано config.xxxx.xxxx это отсылка на config файл, все такие строки замените на ID ваших каналов, а также ссылки на изображения...
+import datetime
+import disnake
+
+from disnake.ext import commands
+
+class Logs(commands.Cog):
+    def __init__(self, bot=commands.Bot):
+        self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: disnake.Member,
+                                        before: disnake.VoiceState,
+                                        after: disnake.VoiceState):
+        if before.channel == after.channel:
+            return
+        if before.channel == None:
+            voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+            voiceupdate.set_author(name="Пользователь подключился к голосовому каналу.",
+                                    icon_url="")
+            voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+            voiceupdate.add_field(name="Канал:", value=f"{after.channel.mention} ({after.channel})", inline=True)
+            voiceupdate.set_image(config.emb_image_none)
+            voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+            channel = self.bot.get_channel(config.channel_id_logs)
+            await channel.send(embed=voiceupdate)
+            return
+        else:
+            if after.channel == None:
+                voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+                voiceupdate.set_author(name="Пользователь покинул голосовой канал.",
+                                           icon_url="")
+                voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+                voiceupdate.add_field(name="Канал:", value=f"{before.channel.mention} ({before.channel})",
+                                          inline=True)
+                voiceupdate.set_image(config.emb_image_none)
+                voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+                channel = self.bot.get_channel(config.channel_id_logs)
+                await channel.send(embed=voiceupdate)
+            else:
+                voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+                voiceupdate.set_author(name="Пользователь сменил голосовой канал.",
+                                       icon_url="")
+                voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+                voiceupdate.add_field(name="Предыдущий канал:", value=f"{before.channel.mention} ({before.channel})",
+                                      inline=True)
+                voiceupdate.add_field(name="Канал:", value=f"{after.channel.mention} ({after.channel})", inline=True)
+                voiceupdate.set_image(config.emb_image_none)
+                voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+                channel = self.bot.get_channel(config.channel_id_logs)
+                await channel.send(embed=voiceupdate)
+
+def setup(bot: commands.Bot):
+    bot.add_cog(Logs(bot))
+    print(f">Extension {__name__} запущен!")
+
+
+
+
+==============================================================================================================
+Бот:
+
+import disnake
+import datetime
+
+from disnake.ext import commands
+
+bot = commands.Bot(command_prefix="!", intents=disnake.Intents.all())
+bot.remove_command("help")
+
+@bot.event
+async def on_ready():
+    print(f"Bot запущен с аккаунта {bot.user} (ID: {bot.user.id})\n------")
+    
+@commands.Bot.listen()
+async def on_voice_state_update(member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
+        if before.channel == after.channel:
+            return
+        if before.channel == None:
+            voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+            voiceupdate.set_author(name="Пользователь подключился к голосовому каналу.",
+                                    icon_url="")
+            voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+            voiceupdate.add_field(name="Канал:", value=f"{after.channel.mention} ({after.channel})", inline=True)
+            voiceupdate.set_image(config.emb_image_none)
+            voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+            channel = self.bot.get_channel(config.channel_id_logs)
+            await channel.send(embed=voiceupdate)
+            return
+        else:
+            if after.channel == None:
+                voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+                voiceupdate.set_author(name="Пользователь покинул голосовой канал.",
+                                           icon_url="")
+                voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+                voiceupdate.add_field(name="Канал:", value=f"{before.channel.mention} ({before.channel})",
+                                          inline=True)
+                voiceupdate.set_image(config.emb_image_none)
+                voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+                channel = self.bot.get_channel(config.channel_id_logs)
+                await channel.send(embed=voiceupdate)
+            else:
+                voiceupdate = disnake.Embed(colour=disnake.Colour.blue())
+                voiceupdate.set_author(name="Пользователь сменил голосовой канал.",
+                                       icon_url="")
+                voiceupdate.add_field(name="Пользователь:", value=f"{member.mention} ({member})", inline=True)
+                voiceupdate.add_field(name="Предыдущий канал:", value=f"{before.channel.mention} ({before.channel})",
+                                      inline=True)
+                voiceupdate.add_field(name="Канал:", value=f"{after.channel.mention} ({after.channel})", inline=True)
+                voiceupdate.set_image(config.emb_image_none)
+                voiceupdate.set_footer(text=f"{datetime.datetime.now().strftime('%Y.%m.%d %H:%M:%S')}")
+                channel = self.bot.get_channel(config.channel_id_logs)
+                await channel.send(embed=voiceupdate)
+                
+bot.run("TOKEN")
